@@ -440,7 +440,21 @@ mod tests {
 
         let parsed = parse_csv_file(&path).expect("parse csv");
         assert_eq!(parsed.events.len(), 1);
-        assert_eq!(parsed.events[0], sample_event(1));
+        assert_eq!(
+            parsed.events[0],
+            CanonicalEvent::new(
+                1,
+                1,
+                "XBTUSD",
+                "LAB",
+                Event::AddOrder {
+                    order_id: OrderId(1),
+                    side: Side::Bid,
+                    price_ticks: 100,
+                    qty: 2,
+                },
+            )
+        );
     }
 
     #[test]
