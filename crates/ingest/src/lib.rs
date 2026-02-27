@@ -109,11 +109,8 @@ pub fn parse_binary_feed_a(mut reader: impl Read) -> Result<ParsedEvents, Ingest
     let started = Instant::now();
     let mut buffer = [0_u8; BINARY_RECORD_LEN];
     let mut events = Vec::new();
-    loop {
-        match read_exact_or_eof(&mut reader, &mut buffer)? {
-            Some(()) => events.push(parse_record(&buffer)?),
-            None => break,
-        }
+    while let Some(()) = read_exact_or_eof(&mut reader, &mut buffer)? {
+        events.push(parse_record(&buffer)?);
     }
     Ok(ParsedEvents {
         stats: ParseStats {
@@ -125,7 +122,7 @@ pub fn parse_binary_feed_a(mut reader: impl Read) -> Result<ParsedEvents, Ingest
 }
 
 pub fn parse_binary_events_b(bytes: &[u8]) -> Result<Vec<CanonicalEvent>, IngestError> {
-    if bytes.len() % BINARY_RECORD_LEN != 0 {
+    if !bytes.len().is_multiple_of(BINARY_RECORD_LEN) {
         return Err(IngestError::InvalidBinaryLength);
     }
     bytes
@@ -380,7 +377,7 @@ mod tests {
             "LAB",
             Event::AddOrder {
                 order_id: OrderId(sequence),
-                side: if sequence % 2 == 0 {
+                side: if sequence.is_multiple_of(2) {
                     Side::Bid
                 } else {
                     Side::Ask

@@ -235,7 +235,7 @@ fn load_index(path: impl AsRef<Path>) -> Result<Vec<IndexEntry>, JournalError> {
     validate_header(&mut reader, INDEX_MAGIC, "index")?;
     let mut bytes = Vec::new();
     reader.read_to_end(&mut bytes)?;
-    if bytes.len() % INDEX_ENTRY_LEN != 0 {
+    if !bytes.len().is_multiple_of(INDEX_ENTRY_LEN) {
         return Err(JournalError::CorruptIndex);
     }
     let mut entries = Vec::with_capacity(bytes.len() / INDEX_ENTRY_LEN);

@@ -585,7 +585,17 @@ mod tests {
 
             for (kind, order_id, price, qty, alt_qty) in stream {
                 let event = match kind {
-                    0 => add(sequence, order_id, if sequence % 2 == 0 { Side::Bid } else { Side::Ask }, price, qty),
+                    0 => add(
+                        sequence,
+                        order_id,
+                        if sequence.is_multiple_of(2) {
+                            Side::Bid
+                        } else {
+                            Side::Ask
+                        },
+                        price,
+                        qty,
+                    ),
                     1 => modify(sequence, order_id, alt_qty),
                     _ => cancel(sequence, order_id, alt_qty),
                 };
