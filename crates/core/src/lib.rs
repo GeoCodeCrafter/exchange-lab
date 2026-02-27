@@ -217,7 +217,7 @@ mod tests {
                 qty: 2,
             },
         );
-        assert_eq!(event.validate(), Ok(()));
+        assert!(event.validate().is_ok());
     }
 
     #[test]
