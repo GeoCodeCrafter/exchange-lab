@@ -92,7 +92,11 @@ impl JournalWriter {
         self.log.write_all(&crc.to_le_bytes())?;
         self.log.write_all(&payload)?;
 
-        if self.config.index_stride == 0 || self.records_written % self.config.index_stride == 0 {
+        if self.config.index_stride == 0
+            || self
+                .records_written
+                .is_multiple_of(self.config.index_stride)
+        {
             let entry = IndexEntry {
                 sequence: event.sequence,
                 timestamp_ns: event.timestamp_ns,
