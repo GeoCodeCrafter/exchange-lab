@@ -1,0 +1,5 @@
+timestamp_ns,sequence,symbol,venue,event_type,order_id,side,price_ticks,qty,new_qty,cancel_qty,maker_order_id,taker_side,bid_px,bid_sz,ask_px,ask_sz
+1,1,XBTUSD,LAB,AddOrder,1001,Bid,100,5,0,0,0,,0,0,0,0
+2,2,XBTUSD,LAB,AddOrder,1002,Ask,101,3,0,0,0,,0,0,0,0
+3,3,XBTUSD,LAB,ModifyOrder,1001,,0,0,4,0,0,,0,0,0,0
+4,4,XBTUSD,LAB,CancelOrder,1002,,0,0,0,1,0,,0,0,0,0

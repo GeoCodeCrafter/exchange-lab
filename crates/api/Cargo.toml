@@ -1,0 +1,22 @@
+[package]
+name = "exchange-lab-api"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+build = "build.rs"
+
+[dependencies]
+axum.workspace = true
+exchange-lab-core = { path = "../core" }
+exchange-lab-journal = { path = "../journal" }
+exchange-lab-metrics = { path = "../metrics" }
+exchange-lab-replay = { path = "../replay" }
+prost.workspace = true
+tokio.workspace = true
+tokio-stream.workspace = true
+tonic.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+
+[build-dependencies]
+tonic-build.workspace = true

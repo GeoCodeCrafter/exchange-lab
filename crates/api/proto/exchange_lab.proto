@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package exchange_lab;
+
+service ExchangeLab {
+  rpc StreamReplay (StreamReplayRequest) returns (stream EventMessage);
+  rpc Status (StatusRequest) returns (StatusResponse);
+  rpc SnapshotMeta (SnapshotMetaRequest) returns (SnapshotMetaResponse);
+}
+
+message StreamReplayRequest {}
+message StatusRequest {}
+message SnapshotMetaRequest {}
+
+message StatusResponse {
+  bool ready = 1;
+  uint64 uptime_ms = 2;
+  string journal_path = 3;
+}
+
+message SnapshotMetaResponse {
+  bool available = 1;
+  uint64 cursor_sequence = 2;
+  uint64 resting_orders = 3;
+}
+
+enum EventKind {
+  EVENT_KIND_UNSPECIFIED = 0;
+  ADD_ORDER = 1;
+  MODIFY_ORDER = 2;
+  CANCEL_ORDER = 3;
+  TRADE = 4;
+  BOOK_SNAPSHOT_TOP = 5;
+}
+
+message EventMessage {
+  uint64 timestamp_ns = 1;
+  uint64 sequence = 2;
+  string symbol = 3;
+  string venue = 4;
+  EventKind kind = 5;
+  uint64 order_id = 6;
+  uint32 side = 7;
+  uint64 price_ticks = 8;
+  uint64 qty = 9;
+  uint64 alt_u64_1 = 10;
+  uint64 alt_u64_2 = 11;
+}
