@@ -1,3 +1,4 @@
+use std::fmt::Write as _;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -245,71 +246,71 @@ fn render_dashboard(state: &ApiState) -> String {
         None => "<li>Snapshot: not configured</li>".to_owned(),
     };
 
-    format!(
-        concat!(
-            "<!doctype html>",
-            "<html lang=\"en\">",
-            "<head>",
-            "<meta charset=\"utf-8\">",
-            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">",
-            "<meta http-equiv=\"refresh\" content=\"5\">",
-            "<title>exchange-lab</title>",
-            "<style>",
-            ":root{color-scheme:light;font-family:Consolas,'Lucida Console',monospace;}",
-            "body{margin:0;background:#f3efe5;color:#1d1d1d;}",
-            ".wrap{max-width:960px;margin:0 auto;padding:32px 20px 48px;}",
-            ".hero{background:linear-gradient(135deg,#f8d9a0,#d9f0e7);border:2px solid #1d1d1d;padding:24px;box-shadow:8px 8px 0 #1d1d1d;}",
-            "h1{margin:0 0 10px;font-size:2.2rem;}",
-            "p{line-height:1.5;}",
-            ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:20px;}",
-            ".card{background:#fff;border:2px solid #1d1d1d;padding:18px;}",
-            "ul{margin:10px 0 0;padding-left:18px;}",
-            "a.button{display:inline-block;margin:8px 10px 0 0;padding:10px 14px;border:2px solid #1d1d1d;text-decoration:none;color:#1d1d1d;background:#f8d9a0;}",
-            "code{background:#efe7d8;padding:2px 4px;}",
-            "</style>",
-            "</head>",
-            "<body><div class=\"wrap\">",
-            "<section class=\"hero\">",
-            "<h1>exchange-lab</h1>",
-            "<p>Deterministic event-sourced matching engine + replay + fault-injection lab.</p>",
-            "<p>Local live dashboard for the currently configured journal.</p>",
-            "<a class=\"button\" href=\"/metrics\">Metrics</a>",
-            "<a class=\"button\" href=\"/healthz\">Health</a>",
-            "<a class=\"button\" href=\"/readyz\">Ready</a>",
-            "</section>",
-            "<section class=\"grid\">",
-            "<div class=\"card\">",
-            "<strong>Server</strong>",
-            "<ul>",
-            "<li>Ready: {ready}</li>",
-            "<li>Uptime: {uptime_ms} ms</li>",
-            "<li>Journal: <code>{journal}</code></li>",
-            "<li>Index: <code>{index}</code></li>",
-            "{snapshot}",
-            "</ul>",
-            "</div>",
-            "<div class=\"card\">",
-            "<strong>How to use it</strong>",
-            "<ul>",
-            "<li>Keep this window open while the local API is running.</li>",
-            "<li>Prometheus metrics are exposed at <code>/metrics</code>.</li>",
-            "<li>gRPC replay stream listens on the configured gRPC port.</li>",
-            "<li>The page refreshes every 5 seconds.</li>",
-            "</ul>",
-            "</div>",
-            "</section>",
-            "</div></body></html>"
-        ),
-        ready = state.is_ready(),
-        uptime_ms = state
-            .started_at
-            .elapsed()
-            .as_millis()
-            .min(u128::from(u64::MAX)),
-        journal = escape_html(&state.journal_path.display().to_string()),
-        index = escape_html(&state.index_path.display().to_string()),
-        snapshot = snapshot,
-    )
+    let uptime_ms = state
+        .started_at
+        .elapsed()
+        .as_millis()
+        .min(u128::from(u64::MAX));
+    let journal = escape_html(&state.journal_path.display().to_string());
+    let index = escape_html(&state.index_path.display().to_string());
+
+    let mut html = String::from(concat!(
+        "<!doctype html>",
+        "<html lang=\"en\">",
+        "<head>",
+        "<meta charset=\"utf-8\">",
+        "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">",
+        "<meta http-equiv=\"refresh\" content=\"5\">",
+        "<title>exchange-lab</title>",
+        "<style>",
+        ":root{color-scheme:light;font-family:Consolas,'Lucida Console',monospace;}",
+        "body{margin:0;background:#f3efe5;color:#1d1d1d;}",
+        ".wrap{max-width:960px;margin:0 auto;padding:32px 20px 48px;}",
+        ".hero{background:linear-gradient(135deg,#f8d9a0,#d9f0e7);border:2px solid #1d1d1d;padding:24px;box-shadow:8px 8px 0 #1d1d1d;}",
+        "h1{margin:0 0 10px;font-size:2.2rem;}",
+        "p{line-height:1.5;}",
+        ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:20px;}",
+        ".card{background:#fff;border:2px solid #1d1d1d;padding:18px;}",
+        "ul{margin:10px 0 0;padding-left:18px;}",
+        "a.button{display:inline-block;margin:8px 10px 0 0;padding:10px 14px;border:2px solid #1d1d1d;text-decoration:none;color:#1d1d1d;background:#f8d9a0;}",
+        "code{background:#efe7d8;padding:2px 4px;}",
+        "</style>",
+        "</head>",
+        "<body><div class=\"wrap\">",
+        "<section class=\"hero\">",
+        "<h1>exchange-lab</h1>",
+        "<p>Deterministic event-sourced matching engine + replay + fault-injection lab.</p>",
+        "<p>Local live dashboard for the currently configured journal.</p>",
+        "<a class=\"button\" href=\"/metrics\">Metrics</a>",
+        "<a class=\"button\" href=\"/healthz\">Health</a>",
+        "<a class=\"button\" href=\"/readyz\">Ready</a>",
+        "</section>",
+        "<section class=\"grid\">",
+        "<div class=\"card\">",
+        "<strong>Server</strong>",
+        "<ul>"
+    ));
+    write!(html, "<li>Ready: {}</li>", state.is_ready()).expect("write ready");
+    write!(html, "<li>Uptime: {} ms</li>", uptime_ms).expect("write uptime");
+    write!(html, "<li>Journal: <code>{}</code></li>", journal).expect("write journal");
+    write!(html, "<li>Index: <code>{}</code></li>", index).expect("write index");
+    html.push_str(&snapshot);
+    html.push_str(concat!(
+        "</ul>",
+        "</div>",
+        "<div class=\"card\">",
+        "<strong>How to use it</strong>",
+        "<ul>",
+        "<li>Keep this window open while the local API is running.</li>",
+        "<li>Prometheus metrics are exposed at <code>/metrics</code>.</li>",
+        "<li>gRPC replay stream listens on the configured gRPC port.</li>",
+        "<li>The page refreshes every 5 seconds.</li>",
+        "</ul>",
+        "</div>",
+        "</section>",
+        "</div></body></html>"
+    ));
+    html
 }
 
 fn escape_html(value: &str) -> String {
@@ -325,7 +326,7 @@ fn proto_event(event: &CanonicalEvent) -> EventMessage {
         sequence: event.sequence,
         symbol: event.symbol.clone(),
         venue: event.venue.clone(),
-        kind: EventKind::EventKindUnspecified as i32,
+        kind: 0,
         order_id: 0,
         side: 0,
         price_ticks: 0,
