@@ -369,25 +369,6 @@ mod tests {
 
     use super::{encode_binary_feed, parse_binary_events_b, parse_binary_feed_a, parse_csv_file};
 
-    fn sample_event(sequence: u64) -> CanonicalEvent {
-        CanonicalEvent::new(
-            1_000 + sequence,
-            sequence,
-            "XBTUSD",
-            "LAB",
-            Event::AddOrder {
-                order_id: OrderId(sequence),
-                side: if sequence.is_multiple_of(2) {
-                    Side::Bid
-                } else {
-                    Side::Ask
-                },
-                price_ticks: 100 + sequence,
-                qty: 1 + sequence,
-            },
-        )
-    }
-
     fn random_event(rng: &mut StdRng, sequence: u64) -> CanonicalEvent {
         let event = match rng.gen_range(0..5) {
             0 => Event::AddOrder {
